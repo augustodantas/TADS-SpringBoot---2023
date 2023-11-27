@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.brocker.ProcessorService;
 import com.example.demo.models.ProductModel;
 import com.example.demo.repositories.ProductRepository;
 
@@ -29,6 +30,9 @@ public class ProductController {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    ProcessorService service;
 
     public record ProductRecordDto(@NotBlank String name, @NotNull BigDecimal value) {
     }
@@ -55,10 +59,12 @@ public class ProductController {
     }
 
     @PostMapping("/api/products")
-    public ResponseEntity<ProductModel> saveProduct(@RequestBody @Valid ProductRecordDto productRecordDto) {
+    public ResponseEntity<ProductModel> saveProduct(@RequestBody 
+        @Valid ProductRecordDto productRecordDto) {
+
         var productModel = new ProductModel();
-        BeanUtils.copyProperties(productRecordDto,
-                productModel);
+        BeanUtils.copyProperties(productRecordDto,productModel);
+        service.execute();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(productRepository.save(productModel));
     }
